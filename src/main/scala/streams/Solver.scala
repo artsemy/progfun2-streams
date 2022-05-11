@@ -27,7 +27,7 @@ trait Solver extends GameDef :
    * that are inside the terrain.
    */
   def neighborsWithHistory(b: Block, history: List[Move]): LazyList[(Block, List[Move])] =
-    b.legalNeighbors.map { case (block, move) => (block, move :: history) }.to(LazyList)
+    b.legalNeighbors.map((block, move) => (block, move :: history)).to(LazyList)
 
   /**
    * This function returns the list of neighbors without the block
@@ -36,7 +36,7 @@ trait Solver extends GameDef :
    */
   def newNeighborsOnly(neighbors: LazyList[(Block, List[Move])],
                        explored: Set[Block]): LazyList[(Block, List[Move])] =
-    neighbors.filterNot { case (bl, _) => explored.contains(bl) }
+    neighbors.filterNot((bl, _) => explored.contains(bl))
 
   /**
    * The function `from` returns the lazy list of all possible paths
@@ -62,13 +62,10 @@ trait Solver extends GameDef :
    * construct the correctly sorted lazy list.
    */
   def from(initial: LazyList[(Block, List[Move])], explored: Set[Block]): LazyList[(Block, List[Move])] =
-    val nextInitial = for {
-      (startBlock, startHistory) <- initial
-      neighbors = neighborsWithHistory(startBlock, startHistory)
-      (nextBlock, nextHistory) <- newNeighborsOnly(neighbors, explored)
-    } yield (nextBlock, nextHistory)
+    val nextInitial = initial
+      .flatMap((block, history) => newNeighborsOnly(neighborsWithHistory(block, history), explored))
     val nextExplored = explored ++ initial.map((block, _) => block)
-    initial #::: from(nextInitial.distinct, nextExplored)
+    initial #::: from(nextInitial, nextExplored)
 
   /**
    * The lazy list of all paths that begin at the starting block.
