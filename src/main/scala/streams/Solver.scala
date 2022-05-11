@@ -61,28 +61,27 @@ trait Solver extends GameDef :
    * of different paths - the implementation should naturally
    * construct the correctly sorted lazy list.
    */
-  def from(initial: LazyList[(Block, List[Move])],
-           explored: Set[Block]): LazyList[(Block, List[Move])] =
+  def from(initial: LazyList[(Block, List[Move])], explored: Set[Block]): LazyList[(Block, List[Move])] =
     val nextInitial = for {
       (startBlock, startHistory) <- initial
       neighbors = neighborsWithHistory(startBlock, startHistory)
       (nextBlock, nextHistory) <- newNeighborsOnly(neighbors, explored)
     } yield (nextBlock, nextHistory)
-    val nextExplored = explored ++ initial.map { case (block, _) => block }
+    val nextExplored = explored ++ initial.map((block, _) => block)
     initial #::: from(nextInitial.distinct, nextExplored)
 
   /**
    * The lazy list of all paths that begin at the starting block.
    */
   lazy val pathsFromStart: LazyList[(Block, List[Move])] =
-    from(LazyList(startBlock -> List()), Set(startBlock))
+    from(LazyList(startBlock -> List()), Set())
 
   /**
    * Returns a lazy list of all possible pairs of the goal block along
    * with the history how it was reached.
    */
   lazy val pathsToGoal: LazyList[(Block, List[Move])] =
-    pathsFromStart.filter { case (block, list) => block.isStanding && block.b1 == goal }
+    pathsFromStart.filter { case (block, _) => block.isStanding && block.b1 == goal }
 
   /**
    * The (or one of the) shortest sequence(s) of moves to reach the
