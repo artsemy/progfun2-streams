@@ -100,6 +100,10 @@ class BloxorzSuite extends munit.FunSuite :
       assertEquals(act, exp)
   }
 
+  test("paths from start amount") {
+    new Level1 :
+      assertEquals(pathsFromStart.length, 111)
+  }
 
   import scala.concurrent.duration.*
 
